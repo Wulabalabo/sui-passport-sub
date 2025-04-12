@@ -284,25 +284,33 @@ export default function HomePage() {
               </p>
             </div>
             {/* Coming Soon */}
-            {/* <div className="mt-8 flex flex-col items-center gap-4 rounded-xl border border-[#1C3850] bg-[#0B1926] p-6 text-center">
-              <div className="flex items-center gap-2">
-                <span className="font-everett text-lg text-[#4DA2FF]">Coming Soon</span>
+            <div className="mt-8 flex flex-col items-center gap-6 rounded-xl border border-[#1C3850] bg-[#0B1926] p-8 text-center">
+              <div className="flex max-w-[600px] items-center">
+                <span className="font-everett text-lg leading-relaxed text-[#ABBDCC]">
+                We’re so grateful for the amazing response to Sui Community Passport! We’re making a few adjustments to smoothly handle the increased activity. Everything should be back to normal within a few hours—thanks for your patience!
+                </span>
               </div>
-              <p className="font-everett_light text-sm text-[#ABBDCC]">
-                The 2025 Sui Community Passport program will launch soon. Stay tuned!
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-[#4DA2FF]"></div>
-                <span className="font-everett_light text-sm text-[#4DA2FF]">Preparing for launch...</span>
-              </div>
-            </div> */}
-            {!userProfile?.passport_id && <PassportCreationModal
+              
+              {/* <div className="flex flex-col gap-4">
+                <p className="font-everett_light text-sm text-[#ABBDCC]">
+                  The 2025 Sui Community Passport program will re-launch soon. Stay tuned!
+                </p>
+
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-[#4DA2FF]"></div>
+                  <span className="font-everett_light text-sm text-[#4DA2FF]">
+                    Preparing for new event...
+                  </span>
+                </div>
+              </div> */}
+            </div>
+            {/* {!userProfile?.passport_id && <PassportCreationModal
               onSubmit={handlePassportCreation}
               isLoading={isMintingPassportWithSponsor || isRefreshingProfile}
-            />}
+            />} */}
           </div>
         </div>
-        <div className="relative mt-16 flex w-full flex-col items-center bg-gradient-to-t from-[#02101C] from-95% pl-2 pr-2">
+        {/* <div className="relative mt-16 flex w-full flex-col items-center bg-gradient-to-t from-[#02101C] from-95% pl-2 pr-2">
           <h1 className="mt-40 max-w-[358px] text-center font-everett text-[40px] leading-[48px] sm:mt-16 sm:max-w-[696px] sm:text-[68px] sm:leading-[80px]">
             Get your stamps
           </h1>
@@ -375,12 +383,12 @@ export default function HomePage() {
               isLoading={isLoading}
             />
           </div>
-        </div>
+        </div> */}
         {/* Only show Turnstile captcha if:
           * 1. Not using Sui Wallet (!isSuiWallet) - Sui Wallet users don't need captcha verification
           * 2. No captcha token exists (!token) - Don't show if already verified
         */}
-        {!isSuiWallet && !token && (
+        {/* {!isSuiWallet && !token && (
           <div className="fixed bottom-4 right-4">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
@@ -393,7 +401,7 @@ export default function HomePage() {
               }}
             />
           </div>
-        )}
+        )} */}
       </div>
     </main>
   );
