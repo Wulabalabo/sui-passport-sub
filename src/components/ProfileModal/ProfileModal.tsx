@@ -23,7 +23,11 @@ import { show_stamp } from "~/lib/contracts/passport";
 import { useBetterSignAndExecuteTransaction } from "~/hooks/use-better-tx";
 import { toast } from "sonner";
 
-export const ProfileModal = () => {
+interface ProfileModalProps {
+  showMobilePopover?: boolean;
+}
+
+export const ProfileModal: React.FC<ProfileModalProps> = ({ showMobilePopover = true }) => {
   const { refreshProfile, userProfile } = useUserProfile()
   const networkVariables = useNetworkVariables()
   const { mutate: disconnect } = useDisconnectWallet()
@@ -32,8 +36,6 @@ export const ProfileModal = () => {
   const { connectionStatus } = useCurrentWallet()
   const [open, setOpen] = useState(false)
   const { clearProfile } = useUserProfile()
-  const [isMobileApp, setIsMobileApp] = useState(false);
-  const [isInSuiWallet, setIsInSuiWallet] = useState(false);
   const { createOrUpdateUser } = useUserCrud()
 
   const { handleSignAndExecuteTransaction: handleShowStampTx, isLoading: isShowingStamp } =
@@ -116,99 +118,10 @@ export const ProfileModal = () => {
     clearProfile()
   }, [disconnect, setOpen, clearProfile])
 
-  useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isSuiWallet = /Sui-Wallet/i.test(navigator.userAgent);
-    setIsInSuiWallet(isSuiWallet);
-    setIsMobileApp(isMobile && !isSuiWallet);
-  }, []);
+  console.log("ProfileModal - showMobilePopover:", showMobilePopover);
+  console.log("ProfileModal - accounts.length:", accounts.length);
 
   if (!accounts.length) {
-    if (isMobileApp && !isInSuiWallet) {
-      return (
-        <Popover open={true}>
-          <PopoverTrigger>
-            <Button
-              className="h-[34px] leading-4 sm:h-[52px]"
-              onClick={() => {
-                window.location.href = "suiwallet://";
-                setTimeout(() => {
-                  window.location.href =
-                    "https://apps.apple.com/us/app/sui-wallet-mobile/id6476572140";
-                }, 5000);
-              }}
-            >
-              <Image
-                src={"/images/drop.png"}
-                alt="wallet"
-                width={12}
-                height={16}
-              />
-              <p className="text-xs">Sui Wallet</p>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[208px] border-none bg-transparent bg-[url(/images/popup-bg.svg)] bg-contain bg-no-repeat px-[14px] pt-5">
-            <div className="flex flex-col items-start gap-2">
-              <div className="flex items-start gap-2">
-                <div className="flex flex-col items-center gap-1.5 font-inter">
-                  <Image
-                    src={"/images/sui-wallet.svg"}
-                    alt="wallet-icon"
-                    width={28}
-                    height={28}
-                  />
-                  <span className="text-[10px] text-white/80">Sui Wallet</span>
-                </div>
-                <Image
-                  src={"/images/arrow-right.png"}
-                  alt="drop-icon"
-                  width={14}
-                  height={14}
-                  className="mt-2"
-                />
-                <div className="flex flex-col items-center gap-1.5 font-inter">
-                  <Image
-                    src={"/images/sui-apps.svg"}
-                    alt="apps-icon"
-                    width={28}
-                    height={28}
-                  />
-                  <span className="text-[10px] text-white/80">Apps</span>
-                </div>
-                <Image
-                  src={"/images/arrow-right.png"}
-                  alt="drop-icon"
-                  width={14}
-                  height={14}
-                  className="mt-2"
-                />
-                <div className="flex flex-col items-center gap-1.5 font-inter">
-                  <Image
-                    src={"/images/sui-passport.svg"}
-                    alt="passport-icon"
-                    width={28}
-                    height={28}
-                  />
-                  <span className="text-[10px] text-white/80">Passport</span>
-                </div>
-              </div>
-              <div className="font-inter text-[10px] text-white">
-                Install the Sui Wallet app on your phone, then{" "}
-                <a
-                  target="blank"
-                  className="underline"
-                  href="https://drive.google.com/file/d/1EN95PHf9BzNyPQKjbVskuZA65wYYIUpt/view?usp=sharing"
-                >
-                  watch video
-                </a>{" "}
-                on using Passport
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
     return (
       <ConnectModal
         open={open}
@@ -222,6 +135,84 @@ export const ProfileModal = () => {
           </Button>
         }
       />
+    );
+  }
+
+  if (showMobilePopover) {
+    console.log("ProfileModal - Rendering Popover");
+    return (
+      <Popover open={true}>
+        <PopoverTrigger>
+          <Button
+            className="h-[34px] leading-4 sm:h-[52px]"
+            onClick={() => {
+              window.location.href = "slush://";
+              setTimeout(() => {
+                window.location.href =
+                  "https://apps.apple.com/us/app/sui-wallet-mobile/id6476572140";
+              }, 5000);
+            }}
+          >
+            <Image
+              src={"/images/drop.png"}
+              alt="wallet"
+              width={12}
+              height={16}
+            />
+            <p className="text-xs">Sui Wallet</p>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[208px] border-none bg-transparent bg-[url(/images/popup-bg.svg)] bg-contain bg-no-repeat px-[14px] pt-5">
+          <div className="flex flex-col items-start gap-2">
+            <div className="flex items-start gap-2">
+              <div className="flex flex-col items-center gap-1.5 font-inter">
+                <Image
+                  src={"/images/slush.png"}
+                  alt="wallet-icon"
+                  width={28}
+                  height={28}
+                />
+                <span className="text-[10px] text-white/80">Sui Wallet</span>
+              </div>
+              <Image
+                src={"/images/arrow-right.png"}
+                alt="drop-icon"
+                width={14}
+                height={14}
+                className="mt-2"
+              />
+              <div className="flex flex-col items-center gap-1.5 font-inter">
+                <Image
+                  src={"/images/slush_app.png"}
+                  alt="apps-icon"
+                  width={28}
+                  height={28}
+                />
+                <span className="text-[10px] text-white/80">Apps</span>
+              </div>
+              <Image
+                src={"/images/arrow-right.png"}
+                alt="drop-icon"
+                width={14}
+                height={14}
+                className="mt-2"
+              />
+              <div className="flex flex-col items-center gap-1.5 font-inter">
+                <Image
+                  src={"/images/sui-passport.svg"}
+                  alt="passport-icon"
+                  width={28}
+                  height={28}
+                />
+                <span className="text-[10px] text-white/80">Passport</span>
+              </div>
+            </div>
+            <div className="font-inter text-[10px] text-white">
+            Install the Slush Wallet app on your phone, go to the App section, and enter the URL suipassport.app.
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
 

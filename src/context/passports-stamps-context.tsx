@@ -39,8 +39,7 @@ export function PassportsStampsProvider({ children }: PassportsStampsProviderPro
            // const fetchedPassport = await getPassportData(networkVariables);
             const claimStamps = await getStamps();
             const updatedStamps = fetchedStamps?.map(stamp => {
-                const claimStamp = claimStamps?.find((cs: DbStampResponse) => cs.stamp_id === stamp.id)
-
+                const claimStamp = claimStamps?.find((cs) => cs.stamp_id === stamp.id)
                 if (claimStamp) {
                     return {
                         ...stamp,
@@ -57,7 +56,6 @@ export function PassportsStampsProvider({ children }: PassportsStampsProviderPro
             }) ?? [];
 
             setStamps(updatedStamps as StampItem[]);
-            console.log(updatedStamps)
             //setPassport(fetchedPassport as PassportItem[]);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch profile'));

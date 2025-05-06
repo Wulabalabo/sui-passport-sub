@@ -92,7 +92,6 @@ export const Sticker: FC<StickerProps> = (props) => {
               `h-[240px] w-[240px] cursor-pointer sm:h-[360px] sm:w-[360px]`,
               { "grayscale(100%) cursor-default opacity-40": isClaimed },
             )}
-            quality={100}
             disabled={Boolean(isClaimed || dropsAmount <= 0)}
           />
           <p className="absolute bottom-0 font-everett uppercase text-[#ABBDCC]">

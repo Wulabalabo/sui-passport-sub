@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { NetworkVariables } from "~/lib/contracts";
 
 export type StampItem = {
     id: string

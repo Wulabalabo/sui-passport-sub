@@ -260,8 +260,18 @@ export const stampService = {
 
     console.log('[Redis MISS] Querying database...');
     const result = await db.select().from(stamps);
-    await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TTL, nx: true });
-    return result;
+    
+    // 处理敏感数据,将claim_code转换为hasClaimCode标志
+    const safeResult = result.map(stamp => {
+      const { claim_code, ...rest } = stamp;
+      return {
+        ...rest,
+        has_claim_code: Boolean(claim_code)
+      };
+    });
+
+    await redis.set(cacheKey, JSON.stringify(safeResult), { ex: CACHE_TTL, nx: true });
+    return safeResult;
   },
 
   // 根据ID获取印章

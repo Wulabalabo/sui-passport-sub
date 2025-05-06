@@ -3,7 +3,6 @@ import Image from "next/image";
 import { ContributorsTable } from "~/components/ContributorsTable/ContributorsTable";
 import { PassportCreationModal } from "~/components/PassportCreationModal/PassportCreationModal";
 import { ProfileModal } from "~/components/ProfileModal/ProfileModal";
-import { Sticker } from "~/components/Sticker/Sticker";
 import { usePassportsStamps } from "~/context/passports-stamps-context";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNetworkVariables } from "~/lib/contracts";
@@ -12,8 +11,6 @@ import { useUserCrud } from "~/hooks/use-user-crud";
 import {
   usersToContributor,
   stampsToDisplayStamps,
-  distributeStamps,
-  STICKER_LAYOUT_CONFIG,
   stampsToDisplayStampsWithOutPassport,
 } from "~/lib/utils";
 import type { VerifyClaimStampRequest, DisplayStamp } from "~/types/stamp";
@@ -28,6 +25,32 @@ import { type PassportFormSchema } from "~/types/passport";
 import { mint_passport } from "~/lib/contracts/passport";
 import { toast } from "sonner";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { StampGroup } from "~/components/StampGroup/StampGroup";
+import { RainbowButton } from "~/components/magicui/rainbow-button";
+
+const pulseKeyframes = `
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse-slow-delayed {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+`;
 
 export default function HomePage() {
   const { stamps, refreshPassportStamps } = usePassportsStamps();
@@ -44,11 +67,12 @@ export default function HomePage() {
   const { createOrUpdateUser } = useUserCrud();
   const [token, setToken] = useState<string | null>(null);
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+  const [showMobilePopover, setShowMobilePopover] = useState(false);
   const [isSuiWallet, setIsSuiWallet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const { handleSignAndExecuteTransaction: handleClaimStampTx, isLoading: isClaimingStamp } =
-  useBetterSignAndExecuteTransaction({
+    useBetterSignAndExecuteTransaction({
       tx: claim_stamp,
     });
 
@@ -59,28 +83,36 @@ export default function HomePage() {
   //   tx: mint_passport,
   // });
 
-  const {handleSignAndExecuteTransaction: handleMintPassportTx, isLoading: isMintingPassportWithSponsor} = useBetterSignAndExecuteTransaction({
+  const { handleSignAndExecuteTransaction: handleMintPassportTx, isLoading: isMintingPassportWithSponsor } = useBetterSignAndExecuteTransaction({
     tx: mint_passport,
   });
 
   const initializeData = useCallback(async () => {
     const users = await fetchUsers();
+    void refreshPassportStamps(networkVariables);
     if (users) {
       setContributors(usersToContributor(users));
     }
-  }, [fetchUsers]);
+  }, [fetchUsers, networkVariables, refreshPassportStamps]);
 
   useEffect(() => {
-    const isSuiWallet = /Sui-Wallet/i.test(navigator.userAgent);
+    const isSuiWallet = /Slush/i.test(navigator.userAgent);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setShowMobilePopover(!isSuiWallet && isMobile);
     setIsSuiWallet(isSuiWallet);
-    if (process.env.NODE_ENV === 'production' && token && !isSuiWallet) {
-      void verifyCaptcha(token).then((success) => {
-        setIsCaptchaVerified(success);
-      });
-    }
-    if(process.env.NODE_ENV === 'development') {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (token && !isSuiWallet) {
+        void verifyCaptcha(token).then((success) => {
+          setIsCaptchaVerified(success);
+        });
+      }
+    } else {
       setIsCaptchaVerified(true);
     }
+
+    console.log("showMobilePopover", !isSuiWallet && isMobile);
+    console.log("isSuiWallet", isSuiWallet);
   }, [token, verifyCaptcha]);
 
   useEffect(() => {
@@ -94,7 +126,6 @@ export default function HomePage() {
     } else if (stamps) {
       setDisplayStamps(stampsToDisplayStampsWithOutPassport(stamps));
     }
-
   }, [stamps, userProfile]);
 
   useEffect(() => {
@@ -103,7 +134,18 @@ export default function HomePage() {
     }
   }, [networkVariables, refreshPassportStamps, connectionStatus]);
 
+  useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = pulseKeyframes;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
+
   const handleClaimStampClick = async (code: string, stamp: DisplayStamp) => {
+    console.log("handleClaimStampClick", code, stamp);
     if (!userProfile?.passport_id) {
       toast.error("You should have a passport to claim a stamp");
       return;
@@ -167,7 +209,7 @@ export default function HomePage() {
   const handlePassportCreation = async (values: PassportFormSchema) => {
     setIsLoading(true);
     let avatarUrl = uploadedAvatarUrl;
-    
+
     // If we have a new file, upload it and get the URL
     if (values.avatarFile) {
       if (!(values.avatarFile instanceof Blob)) {
@@ -239,33 +281,51 @@ export default function HomePage() {
     [initializeData, userProfile, currentAccount, createOrUpdateUser, networkVariables],
   );
 
-  const stampsLayout = useMemo(
-    () => distributeStamps(displayStamps),
-    [displayStamps],
-  );
-
   return (
     <main className="flex min-h-screen flex-col items-center bg-[#02101C] text-white">
-      <div className="flex w-full max-w-[375px] flex-col items-center sm:max-w-[1424px]">
-        <div className="bg-[#02101C] py-6 flex w-full justify-between px-2 sm:pl-[35px] sm:pr-6 sticky top-0 z-20 sm:static">
-          <div className="flex flex-shrink-0 items-center gap-3">
-            <Image
-              src={"/images/sui-logo.png"}
-              alt="drop"
-              width={24}
-              height={24}
-              className="h-[20px] w-[20px] sm:h-[32px] sm:w-[32px]"
-            />
-            <div className="relative flex items-center">
-              <p className="font-inter text-sm sm:text-[24px]">
-                2025 Sui Community Passport
+      <div className="flex w-full flex-col items-center sm:max-w-[1424px]">
+        <div className="bg-[#02101C] py-4 sm:py-6 flex w-full flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 sticky top-0 z-20 sm:static gap-4 sm:gap-0">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+              <Image
+                src={"/images/sui-logo.png"}
+                alt="drop"
+                width={24}
+                height={24}
+                className="h-[24px] w-[24px] sm:h-[32px] sm:w-[32px]"
+              />
+              <p className="font-inter text-[14px] sm:text-[24px] text-white">
+                Sui Community Passport
               </p>
             </div>
+            <div className="block sm:hidden">
+              <ProfileModal showMobilePopover={showMobilePopover} />
+            </div>
           </div>
-          {/* Show ProfileModal if user is using Sui Wallet or has passed captcha verification */}
-          {(isSuiWallet || isCaptchaVerified) && <ProfileModal />}
+
+          <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+            <RainbowButton
+              onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
+              className="hidden sm:block w-full sm:w-auto"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  className="fill-current sm:w-6 sm:h-6"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span className="font-inter text-base sm:text-lg font-medium">Follow @SuiFamOfficial</span>
+              </div>
+            </RainbowButton>
+            <div className="hidden sm:block">
+              {isCaptchaVerified && <ProfileModal showMobilePopover={false} />}
+            </div>
+          </div>
         </div>
-        <div className="relative flex w-full flex-col items-center rounded-t-xl bg-[#02101C] pl-2 pr-2 ">
+        <div className="relative flex w-full flex-col items-center rounded-t-xl bg-[#02101C] overflow-hidden">
           <Image
             className="absolute top-0 hidden rounded-xl sm:block brightness-[60%]"
             src={"/images/card-background.png"}
@@ -282,101 +342,56 @@ export default function HomePage() {
             height={491}
             unoptimized
           />
-          <div className="z-10 flex w-full max-w-[1424px] flex-col items-center justify-center">
+          <div className="z-10 flex w-full flex-col items-center justify-center">
             <h1 className="mt-8 max-w-[304px] text-center font-everett text-[40px] leading-[48px] sm:mt-16 sm:max-w-[696px] sm:text-[68px] sm:leading-[80px]">
               Make your mark on the Sui Community
             </h1>
-            <div className="mt-6 flex max-w-[342px] flex-col gap-3 text-center font-everett_light text-[14px] text-[#ABBDCC] sm:max-w-[696px] sm:text-[16px]">
+            <div className="mt-6 flex max-w-[342px] flex-col gap-3 text-center font-everett_light text-[14px] text-[#ABBDCC] sm:max-w-[696px] sm:text-[16px] p-2">
               <p>
                 The Sui community flourishes because of passionate members like you. Through content and events, your contributions help elevate our Sui Community.
               </p>
               <p>
                 Connect your wallet today and claim your first stamp!
-              </p>
+              </p>              
+              <RainbowButton
+                onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
+                className="block sm:hidden w-full sm:w-auto"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    className="fill-current sm:w-6 sm:h-6"
+                  >
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span className="font-inter text-base sm:text-lg font-medium">Follow @SuiFamOfficial</span>
+                </div>
+              </RainbowButton>
             </div>
-            {/* Coming Soon */}
-            {/* <div className="mt-8 flex flex-col items-center gap-4 rounded-xl border border-[#1C3850] bg-[#0B1926] p-6 text-center">
-              <div className="flex items-center gap-2">
-                <span className="font-everett text-lg text-[#4DA2FF]">Coming Soon</span>
-              </div>
-              <p className="font-everett_light text-sm text-[#ABBDCC]">
-                The 2025 Sui Community Passport program will launch soon. Stay tuned!
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-[#4DA2FF]"></div>
-                <span className="font-everett_light text-sm text-[#4DA2FF]">Preparing for launch...</span>
-              </div>
-            </div> */}
+            <div>
+            </div>
             {!userProfile?.passport_id && <PassportCreationModal
               onSubmit={handlePassportCreation}
               isLoading={isMintingPassportWithSponsor || isRefreshingProfile || isLoading}
             />}
           </div>
         </div>
-        <div className="relative mt-16 flex w-full flex-col items-center bg-gradient-to-t from-[#02101C] from-95% pl-2 pr-2">
-          <h1 className="mt-40 max-w-[358px] text-center font-everett text-[40px] leading-[48px] sm:mt-16 sm:max-w-[696px] sm:text-[68px] sm:leading-[80px]">
+        <div className="relative flex w-full flex-col items-center bg-gradient-to-t from-[#02101C] from-95% overflow-hidden">
+          <h1 className="mt-10 max-w-[358px] text-center font-everett text-[40px] leading-[48px] sm:my-10 
+          sm:max-w-[696px] sm:text-[68px] sm:leading-[80px]">
             Get your stamps
           </h1>
-          <div className="mt-[37px] flex flex-col-reverse justify-between sm:min-w-[900px] sm:flex-row">
-            <div className="flex flex-col">
-              {stampsLayout.left.map((stamp, index) => (
-                <Sticker
-                  key={stamp.id}
-                  stampId={stamp.id}
-                  url={stamp.imageUrl ?? ""}
-                  name={stamp.name}
-                  rotation={STICKER_LAYOUT_CONFIG.left[index]?.rotation ?? 0}
-                  amountLeft={stamp.leftStamps}
-                  dropsAmount={stamp.leftStamps}
-                  isClaimed={stamp.isClaimed ?? false}
-                  isPublicClaim={stamp.publicClaim}
-                  open={openStickers[stamp.id] ?? false}
-                  onOpenChange={(open) => handleOpenChange(stamp.id, open)}
-                  onClaim={(code) => handleClaimStampClick(code, stamp)}
-                  isLoading={isClaimingStamp || isVerifyingClaimStamp}
-                />
-              ))}
-            </div>
-            <div className="flex flex-col">
-              {stampsLayout.center.map((stamp, index) => (
-                <Sticker
-                  key={stamp.id}
-                  stampId={stamp.id}
-                  url={stamp.imageUrl ?? ""}
-                  name={stamp.name}
-                  rotation={STICKER_LAYOUT_CONFIG.center[index]?.rotation ?? 0}
-                  amountLeft={stamp.leftStamps}
-                  dropsAmount={stamp.leftStamps}
-                  isClaimed={stamp.isClaimed ?? false}
-                  isPublicClaim={stamp.publicClaim}
-                  open={openStickers[stamp.id] ?? false}
-                  onOpenChange={(open) => handleOpenChange(stamp.id, open)}
-                  onClaim={(code) => handleClaimStampClick(code, stamp)}
-                  isLoading={isClaimingStamp || isVerifyingClaimStamp}
-                />
-              ))}
-            </div>
-            <div className="flex flex-col">
-              {stampsLayout.right.map((stamp, index) => (
-                <Sticker
-                  key={stamp.id}
-                  stampId={stamp.id}
-                  url={stamp.imageUrl ?? ""}
-                  name={stamp.name}
-                  rotation={STICKER_LAYOUT_CONFIG.right[index]?.rotation ?? 0}
-                  amountLeft={stamp.leftStamps}
-                  dropsAmount={stamp.leftStamps}
-                  isClaimed={stamp.isClaimed ?? false}
-                  isPublicClaim={stamp.publicClaim}
-                  open={openStickers[stamp.id] ?? false}
-                  onOpenChange={(open) => handleOpenChange(stamp.id, open)}
-                  onClaim={(code) => handleClaimStampClick(code, stamp)}
-                  isLoading={isClaimingStamp || isVerifyingClaimStamp}
-                />
-              ))}
-            </div>
-          </div>
-          <h2 className="mt-[185px] max-w-[263px] text-center font-everett text-[24px] leading-[28px] sm:text-[32px] sm:leading-[38px]">
+          <StampGroup
+            leftStamp={displayStamps[0] ?? undefined}
+            rightStamp={displayStamps[1] ?? undefined}
+            onStampClick={handleClaimStampClick}
+            isLoading={isClaimingStamp || isVerifyingClaimStamp}
+            openStickers={openStickers}
+            onOpenChange={handleOpenChange}
+          />
+          <h2 className="mt-20 max-w-[263px] text-center font-everett text-[24px] leading-[28px] sm:text-[32px] sm:leading-[38px]">
             Top Contributors
           </h2>
           <div className="mb-[48px] mt-6 w-full sm:mb-[80px]">
