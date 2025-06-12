@@ -23,7 +23,7 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ onAvatarChange }) => {
   const onChange = (imageList: ImageListType) => {
     if (imageList?.[0]) {
       if (imageList[0].file && imageList[0].file.size > MAX_FILE_SIZE) {
-        toast.error("Image size should not exceed 5MB");
+        toast.error("Image size should not exceed 2MB");
         return;
       }
       setValue("avatar", imageList[0].dataURL);

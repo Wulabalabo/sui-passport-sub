@@ -21,19 +21,28 @@ export const StickersLayout = ({ stamps, collections, visitor, onStickerClick, i
     setStickerData(stampsToStickerData(stamps, collections));
   }, [stamps, collections, visitor]);
 
-  const stickersWidth = useMemo(() => {
-    if (isMobile) return "auto";
-    if (stickerData.length === 1) return "260px";
-    if (stickerData.length === 2) return "600px";
-    else return "1000px";
-  }, [stickerData, isMobile]);
+  // 计算网格列数
+  const gridCols = useMemo(() => {
+    if (isMobile) return 2;
+    if (stickerData.length <= 4) return 2;
+    if (stickerData.length <= 9) return 3;
+    return 4;
+  }, [stickerData.length, isMobile]);
+
+  // 计算贴纸大小
+  const stickerSize = useMemo(() => {
+    if (isMobile) return 150;
+    if (stickerData.length <= 4) return 200;
+    if (stickerData.length <= 9) return 180;
+    return 160;
+  }, [stickerData.length, isMobile]);
 
   return (
-    <div className="flex w-auto flex-wrap justify-center gap-[16px] sm:h-screen sm:w-[1440px]">
+    <div className="flex w-full justify-center p-4">
       <div
-        className="grid grid-cols-2 sm:relative"
+        className={`grid gap-6 w-full max-w-[1200px] place-items-center`}
         style={{
-          width: stickersWidth,
+          gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
         }}
       >
         {stickerData.map(
@@ -43,37 +52,32 @@ export const StickersLayout = ({ stamps, collections, visitor, onStickerClick, i
             url,
             name,
             rotation,
-            size,
-            top,
-            left = "auto",
-            right = "auto",
           }) => (
             <div
-              key={id}  
-              className={`flex h-[150px] w-[150px] flex-col items-center sm:absolute sm:h-auto sm:w-auto relative ${!isActive && onStickerClick && "cursor-pointer"}`}
+              key={id}
+              className={`flex flex-col items-center justify-between relative ${!isActive && onStickerClick && "cursor-pointer"}`}
               style={{
-                top,
-                left,
-                right,
+                height: `${stickerSize}px`,
+                width: `${stickerSize}px`,
                 transform: `rotate(${rotation}deg)`,
               }}
               onClick={() => !isActive && !isLoading && onStickerClick?.(id)}
             >
               <AnimatedImage
                 src={url}
-                width={size}
-                height={size}
+                width={stickerSize}
+                height={stickerSize}
                 alt="sticker"
                 disabled={!isActive}
               />
               {!isActive && onStickerClick && (
-                <div className="absolute inset-0 flex items-center hover:scale-110 transition-transform duration-200 justify-center bg-black/50">
-                  <p className="font-everett text-[20px] uppercase text-white">
+                <div className="absolute inset-0 flex items-center hover:scale-110 transition-transform duration-200 justify-center bg-black/50 rounded-lg">
+                  <p className="font-everett text-[16px] uppercase text-white text-center px-2">
                     Click to get Points
                   </p>
                 </div>
               )}
-              <p className="absolute bottom-0 font-everett text-[14px] uppercase text-[#ABBDCC]">
+              <p className="absolute bottom-0 font-everett sm:text-[14px] uppercase text-[#ABBDCC] text-center text-sm text-nowrap">
                 {name}
               </p>
             </div>

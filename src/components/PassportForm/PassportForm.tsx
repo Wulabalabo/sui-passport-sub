@@ -67,6 +67,39 @@ export const PassportForm: FC<PassportFormProps> = ({
               {...methods.register("introduction")}
               onChange={(e) => setIntro(e.target.value)}
             />
+
+            
+              <div className="mt-1 flex items-center justify-between rounded-xl border border-[#334155] bg-gradient-to-r from-[#213244] from-10% via-[#13273d] to-[#17293c] p-4">
+              <div className="flex items-center gap-4">
+                <Image
+                  src={"/images/x.png"}
+                  alt="x-logo"
+                  width={20}
+                  height={20}
+                  className="h-[20px] w-[20px]"
+                />
+                <p className="font-inter text-[14px] text-[#ABBDCC]">
+                  Follow us on X
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-[40px] w-[100px] rounded-xl border-[#4F46E5] bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white hover:from-[#6366F1] hover:to-[#8B5CF6] shadow-lg transition-all duration-200"
+                onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  className="mr-1 fill-current"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Follow
+              </Button>
+            </div>
+            
             {/* <div className="flex items-center justify-between">
               <div className="flex items-center justify-between">
                 <Image
@@ -101,7 +134,7 @@ export const PassportForm: FC<PassportFormProps> = ({
                 className="h-[43px] w-[242px] sm:h-[56px] sm:w-[384px]"
                 {...methods.register("github")}
               />
-            </div>*/}
+            </div> */}
           </div> 
           <div className="mb-[25px] mt-[48px] flex justify-end gap-4">
             <DialogClose asChild>

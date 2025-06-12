@@ -73,7 +73,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ showMobilePopover = 
       stamp_count: userProfile.stamps?.length ?? 0,
       name: userProfile.name,
       points: Number(userProfile.points),
-      packageId: networkVariables.package,
+      packageId: networkVariables.originPackage,
     };
 
     const syncTimeout = setTimeout(() => {
@@ -88,7 +88,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ showMobilePopover = 
     userProfile?.stamps?.length,
     userProfile?.name,
     userProfile?.points,
-    networkVariables.package,
+    networkVariables.originPackage,
     createOrUpdateUser // 现在可以安全地加入依赖数组
   ]);
 
@@ -118,8 +118,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ showMobilePopover = 
     clearProfile()
   }, [disconnect, setOpen, clearProfile])
 
-  console.log("ProfileModal - showMobilePopover:", showMobilePopover);
-  console.log("ProfileModal - accounts.length:", accounts.length);
+  // console.log("ProfileModal - showMobilePopover:", showMobilePopover);
+  // console.log("ProfileModal - accounts.length:", accounts.length);
 
   if (!accounts.length) {
     return (

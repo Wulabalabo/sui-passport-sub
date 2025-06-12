@@ -89,7 +89,7 @@ export const Sticker: FC<StickerProps> = (props) => {
             width={360}
             height={360}
             className={cn(
-              `h-[240px] w-[240px] cursor-pointer sm:h-[360px] sm:w-[360px]`,
+              `mb-10 h-[240px] w-[240px] cursor-pointer sm:h-[360px] sm:w-[360px]`,
               { "grayscale(100%) cursor-default opacity-40": isClaimed },
             )}
             disabled={Boolean(isClaimed || dropsAmount <= 0)}
@@ -125,7 +125,7 @@ export const Sticker: FC<StickerProps> = (props) => {
               alt="sticker"
               width={480}
               height={480}
-              className="h-[360px] w-[360px] sm:h-[480px] sm:w-[480px]"
+              className="mb-20 h-[360px] w-[360px] sm:h-[480px] sm:w-[480px]"
             />
             <div className="absolute bottom-0 flex flex-col items-center gap-4">
               <a

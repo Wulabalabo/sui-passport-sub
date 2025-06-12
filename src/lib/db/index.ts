@@ -20,6 +20,7 @@ import { fromHex } from '@mysten/sui/utils';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { keccak256 } from "js-sha3";
 import type { VerifyStampParams } from '~/types/stamp';
+import { blacklist } from './blacklist';
 const CACHE_TTL = 3600; // 1 hour in seconds
 
 // 用户相关操作
@@ -139,13 +140,20 @@ export const userService = {
     }
 
     console.log('[Redis MISS] Querying database...');
+    
+    
+
+    // 获取更多用户以确保过滤后仍有100个
     const result = await db.select()
       .from(users)
       .orderBy(sql`points DESC`)
-      .limit(100);
+      .limit(100 + blacklist.length);
 
-    await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TTL, nx: true });
-    return result;
+    // 在应用层过滤黑名单地址
+    const filteredResult = result.filter(user => !blacklist.includes(user.address)).slice(0, 100);
+
+    await redis.set(cacheKey, JSON.stringify(filteredResult), { ex: CACHE_TTL, nx: true });
+    return filteredResult;
   },
 
   // 根据地址获取用户

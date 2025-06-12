@@ -12,7 +12,7 @@ const calcY = (x: number, lx: number) => (x - lx - window.innerWidth / 2) / 20;
 type Props = ComponentProps<'img'> & {disabled?: boolean};
 
 export const AnimatedImage: FC<Props> = (props) => {
-  const {disabled} = props;
+  const {disabled, width, height} = props;
   const [{ x, y, rotateX, rotateY, rotateZ, zoom, scale }, api] = useSpring(
     () => ({
         rotateX: 0,
@@ -40,6 +40,10 @@ export const AnimatedImage: FC<Props> = (props) => {
     },
     { domTarget, eventOptions: { passive: true} },
   );
+
+  // 计算最大高度，留出文字的空间
+  const maxHeight = typeof height === 'number' ? height * 0.8 : '80%';
+
   return (
     <animated.div
       ref={domTarget}
@@ -51,9 +55,27 @@ export const AnimatedImage: FC<Props> = (props) => {
         rotateX,
         rotateY,
         rotateZ,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <img {...props}/>
+      <Image 
+        {...props}
+        style={{
+          ...props.style,
+          maxHeight,
+          width: 'auto',
+          height: 'auto',
+          objectFit: 'contain',
+        }}
+        src={props.src ?? ''}
+        alt={props.alt ?? ''}
+        width={typeof width === 'string' ? parseInt(width) : width}
+        height={typeof height === 'string' ? parseInt(height) : height}
+      />
     </animated.div>
   );
 };

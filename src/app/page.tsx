@@ -170,7 +170,7 @@ export default function HomePage() {
       last_time: Number(userProfile?.last_time),
       stamp_name: stamp?.name,
       address: currentAccount?.address ?? "",
-      packageId: networkVariables?.package,
+      packageId: networkVariables?.originPackage,
     };
     const data = await verifyClaimStamp(requestBody);
     if (!data.success) {
@@ -272,7 +272,7 @@ export default function HomePage() {
           stamp_count: userProfile.stamps?.length ?? 0,
           name: userProfile.name,
           points: Number(userProfile.points),
-          packageId: networkVariables.package,
+          packageId: networkVariables.originPackage,
         })
       }
 
@@ -406,7 +406,7 @@ export default function HomePage() {
           * 1. Not using Sui Wallet (!isSuiWallet) - Sui Wallet users don't need captcha verification
           * 2. No captcha token exists (!token) - Don't show if already verified
         */}
-        {!isSuiWallet && !token && (
+        {!isSuiWallet && !token && process.env.NODE_ENV === 'production' && (
           <div className="fixed bottom-4 right-4">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}

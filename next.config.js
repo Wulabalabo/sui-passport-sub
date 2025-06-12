@@ -11,6 +11,9 @@ const config = {
             {
                 hostname: "images.suipassport.app",
             },
+            {
+                hostname: "avatar.suipassport.app",
+            },
         ],
     },
     compiler:{
