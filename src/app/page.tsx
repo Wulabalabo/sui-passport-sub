@@ -26,7 +26,7 @@ import { mint_passport } from "~/lib/contracts/passport";
 import { toast } from "sonner";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { StampGroup } from "~/components/StampGroup/StampGroup";
-import { RainbowButton } from "~/components/magicui/rainbow-button";
+// import { RainbowButton } from "~/components/magicui/rainbow-button";
 
 const pulseKeyframes = `
 @keyframes pulse-slow {
@@ -304,7 +304,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-between w-full sm:w-auto gap-4">
-            <RainbowButton
+            {/* <RainbowButton
               onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
               className="hidden sm:block w-full sm:w-auto"
             >
@@ -319,7 +319,7 @@ export default function HomePage() {
                 </svg>
                 <span className="font-inter text-base sm:text-lg font-medium">Follow @SuiFamOfficial</span>
               </div>
-            </RainbowButton>
+            </RainbowButton> */}
             <div className="hidden sm:block">
               {isCaptchaVerified && <ProfileModal showMobilePopover={false} />}
             </div>
@@ -353,7 +353,7 @@ export default function HomePage() {
               <p>
                 Connect your wallet today and claim your first stamp!
               </p>              
-              <RainbowButton
+              {/* <RainbowButton
                 onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
                 className="block sm:hidden w-full sm:w-auto"
               >
@@ -368,7 +368,7 @@ export default function HomePage() {
                   </svg>
                   <span className="font-inter text-base sm:text-lg font-medium">Follow @SuiFamOfficial</span>
                 </div>
-              </RainbowButton>
+              </RainbowButton> */}
             </div>
             <div>
             </div>
