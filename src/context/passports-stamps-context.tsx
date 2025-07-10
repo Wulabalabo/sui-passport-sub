@@ -49,7 +49,8 @@ export function PassportsStampsProvider({ children }: PassportsStampsProviderPro
                         totalCountLimit: claimStamp?.total_count_limit ?? null,
                         userCountLimit: claimStamp?.user_count_limit ?? null,
                         claimCount: claimStamp.claim_count ?? null,
-                        publicClaim: claimStamp.public_claim ?? false
+                        publicClaim: claimStamp.public_claim ?? false,
+                        promote_url: claimStamp.promote_url ?? null
                     };
                 }
                 return stamp;

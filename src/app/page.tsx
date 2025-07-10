@@ -379,7 +379,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="relative flex w-full flex-col items-center bg-gradient-to-t from-[#02101C] from-95% overflow-hidden">
-          <h1 className="mt-10 max-w-[358px] text-center font-everett text-[40px] leading-[48px] sm:my-10 
+          <h1 className="my-10 max-w-[358px] text-center font-everett text-[40px] leading-[48px] sm:my-10 
           sm:max-w-[696px] sm:text-[68px] sm:leading-[80px]">
             Get your stamps
           </h1>
@@ -391,7 +391,7 @@ export default function HomePage() {
             openStickers={openStickers}
             onOpenChange={handleOpenChange}
           />
-          <h2 className="mt-20 max-w-[263px] text-center font-everett text-[24px] leading-[28px] sm:text-[32px] sm:leading-[38px]">
+          <h2 className="mt-20 pt-10 max-w-[263px] text-center font-everett text-[24px] leading-[28px] sm:text-[32px] sm:leading-[38px]">
             Top Contributors
           </h2>
           <div className="mb-[48px] mt-6 w-full sm:mb-[80px]">

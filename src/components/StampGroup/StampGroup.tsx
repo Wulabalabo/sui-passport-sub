@@ -37,7 +37,7 @@ export const StampGroup: FC<StampGroupProps> = ({
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center w-full sm:flex-row gap-8 px-4 sm:px-0">
+      <div className="flex flex-col items-center justify-center w-full sm:flex-row gap-8 px-4 gap-y-16 sm:gap-y-0 sm:px-0">
         {/* Left Stamp */}
         <div className="relative isolate w-full max-w-[350px]">
           {leftStamp && (
@@ -55,6 +55,7 @@ export const StampGroup: FC<StampGroupProps> = ({
                 onOpenChange={(open) => onOpenChange(leftStamp.id, open)}
                 onClaim={(code) => onStampClick?.(code, leftStamp)}
                 isLoading={isLoading}
+                promoteUrl={leftStamp.promote_url}
                 className="w-full h-full"
               />
             </div>
@@ -90,6 +91,7 @@ export const StampGroup: FC<StampGroupProps> = ({
                 onOpenChange={(open) => onOpenChange(rightStamp.id, open)}
                 onClaim={(code) => onStampClick?.(code, rightStamp)}
                 isLoading={isLoading}
+                promoteUrl={rightStamp.promote_url}
                 className="w-full h-full"
               />
           )}

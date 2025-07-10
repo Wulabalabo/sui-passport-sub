@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 import { TextInput } from "../TextInput/TextInput";
 import { AnimatedImage } from "../AnimatedImage.tsx/AnimatedImage";
 import { cn } from "~/lib/utils";
+import { RainbowButton } from "../magicui/rainbow-button";
 type StickerProps = {
   stampId: string;
   url: string;
@@ -25,6 +26,7 @@ type StickerProps = {
   isClaimed?: boolean;
   className?: string;
   isPublicClaim?: boolean;
+  promoteUrl?: string | null;
   open?: boolean;
   isLoading?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -42,6 +44,7 @@ export const Sticker: FC<StickerProps> = (props) => {
     dropsAmount,
     className,
     isPublicClaim = false,
+    promoteUrl,
     onClaim,
     open = false,
     isLoading = false,
@@ -110,6 +113,26 @@ export const Sticker: FC<StickerProps> = (props) => {
           )}
         </div>
       </DialogTrigger>
+              {promoteUrl && (
+          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10 hover:scale-105 transition-all duration-300">
+            <RainbowButton
+              onClick={() => window.open(promoteUrl, "_blank")}
+              className="h-[40px] px-4 py-2 text-sm whitespace-nowrap"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  className="fill-current"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span className="font-inter font-medium">Follow</span>
+              </div>
+            </RainbowButton>
+          </div>
+        )}
       <DialogContent aria-describedby={undefined}>
         <DialogTitle />
         <motion.div

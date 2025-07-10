@@ -15,6 +15,7 @@ export type StampItem = {
     claimCount?: number
     event?: string
     publicClaim?: boolean
+    promote_url?: string | null
 }
 
 export interface StampGridProps {
@@ -74,6 +75,7 @@ export interface DbStampResponse {
     user_count_limit: number | null;
     claim_count: number;
     public_claim: boolean;
+    promote_url: string | null;
 }
 
 export interface VerifyStampParams {
