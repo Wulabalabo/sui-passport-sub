@@ -39,16 +39,20 @@ export function useStampCRUD() {
     }
   }
 
-  const increaseStampCountToDb = async (id: string) => {
+  const increaseStampCountToDb = async (id: string, userAddress: string, txHash?: string) => {
     try {
-      const response = await apiFetch<DbStampResponse>(`/api/stamps`, {
+      const response = await apiFetch<any>(`/api/stamps`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stamp_id: id })
+        body: JSON.stringify({ 
+          stamp_id: id, 
+          user_address: userAddress,
+          tx_hash: txHash 
+        })
       })
       return response
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to increase stamp count'))
+      setError(err instanceof Error ? err : new Error('Failed to record user stamp'))
       throw err
     }
   }

@@ -146,13 +146,16 @@ export default function HomePage() {
 
   const handleClaimStampClick = async (code: string, stamp: DisplayStamp) => {
     console.log("handleClaimStampClick", code, stamp);
+    setIsLoading(true);
     if (!userProfile?.passport_id) {
       toast.error("You should have a passport to claim a stamp");
+      setIsLoading(false);
       return;
     }
     const stamps = userProfile?.stamps;
     if (stamps?.some((stamp) => stamp.event === stamp?.name)) {
       toast.error(`You have already have this stamp`);
+      setIsLoading(false);
       return;
     }
     if (
@@ -161,6 +164,7 @@ export default function HomePage() {
       stamp?.claimCount >= stamp.totalCountLimit!
     ) {
       toast.error("Stamp is claimed out");
+      setIsLoading(false);
       return;
     }
     const requestBody: VerifyClaimStampRequest = {
@@ -176,11 +180,13 @@ export default function HomePage() {
     if (!data.success) {
       toast.error(data.error);
       handleOpenChange(stamp.id, false);
+      setIsLoading(false);
       return;
     }
     if (!data.signature || !data.valid) {
       toast.error("Invalid claim code");
-      throw new Error("Invalid claim code");
+      setIsLoading(false);
+      return;
     }
 
 
@@ -194,16 +200,18 @@ export default function HomePage() {
         sig: signatureArray,
       },
     )
-      .onSuccess(async () => {
+      .onSuccess(async (result) => {
         toast.success("Stamp claimed successfully", {
           duration: 2500
         });
         handleOpenChange(stamp.id, false);
         await refreshProfile(currentAccount?.address ?? "", networkVariables);
         await refreshPassportStamps(networkVariables);
-        await increaseStampCountToDb(stamp.id);
+        // 传入用户地址和交易hash
+        await increaseStampCountToDb(stamp.id, currentAccount?.address ?? "", result?.digest);
       })
       .execute();
+    setIsLoading(false);
   };
 
   const handlePassportCreation = async (values: PassportFormSchema) => {
@@ -384,10 +392,9 @@ export default function HomePage() {
             Get your stamps
           </h1>
           <StampGroup
-            leftStamp={displayStamps[0] ?? undefined}
-            rightStamp={displayStamps[1] ?? undefined}
+            stamps={displayStamps}
             onStampClick={handleClaimStampClick}
-            isLoading={isClaimingStamp || isVerifyingClaimStamp}
+            isLoading={isClaimingStamp || isVerifyingClaimStamp || isLoading}
             openStickers={openStickers}
             onOpenChange={handleOpenChange}
           />

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { db } from '../neondb';
-import { users, stamps } from './schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { users, stamps, user_stamps } from './schema';
+import { eq, and, sql, count } from 'drizzle-orm';
 import type { NewUser, UpdateUser, NewStamp, UpdateStamp, DbUserResponse, DbStampResponse } from '../../types/db';
 import { redis } from '../kv-cache';
 import type {   
@@ -410,6 +410,79 @@ export const stampService = {
     // 清除相关缓存
     await redis.del(`stamp:${id}`, 'neon_stamps');
     return result[0];
+  },
+
+  // 检查用户是否已经获取过此stamp
+  async checkUserStampExists(userAddress: string, stampId: string): Promise<boolean> {
+    const result = await db.select({ count: count() })
+      .from(user_stamps)
+      .where(and(
+        eq(user_stamps.user_address, userAddress),
+        eq(user_stamps.stamp_id, stampId)
+      ));
+    return (result[0]?.count ?? 0) > 0;
+  },
+
+  // 获取用户某个stamp的获取次数
+  async getUserStampCount(userAddress: string, stampId: string): Promise<number> {
+    const result = await db.select({ count: count() })
+      .from(user_stamps)
+      .where(and(
+        eq(user_stamps.user_address, userAddress),
+        eq(user_stamps.stamp_id, stampId)
+      ));
+    return result[0]?.count || 0;
+  },
+
+  // 记录用户获取stamp（原子操作）
+  async recordUserStamp(userAddress: string, stampId: string, txHash?: string) {
+    // 使用事务确保原子性
+    return await db.transaction(async (tx) => {
+      // 检查用户是否已经获取过此stamp
+      const existingCount = await tx.select({ count: count() })
+        .from(user_stamps)
+        .where(and(
+          eq(user_stamps.user_address, userAddress),
+          eq(user_stamps.stamp_id, stampId)
+        ));
+
+      // 获取stamp的用户限制
+      const stampResult = await tx.select()
+        .from(stamps)
+        .where(eq(stamps.stamp_id, stampId))
+        .limit(1);
+
+      if (!stampResult[0]) {
+        throw new Error('Stamp not found');
+      }
+
+      const stamp = stampResult[0];
+      const currentCount = existingCount[0]?.count || 0;
+      const userLimit = stamp?.user_count_limit || 1;
+
+      if (currentCount >= userLimit) {
+        throw new Error(`User has already claimed the maximum number (${userLimit}) of this stamp`);
+      }
+
+      // 记录用户获取stamp
+      const userStampResult = await tx.insert(user_stamps)
+        .values({
+          user_address: userAddress,
+          stamp_id: stampId,
+          tx_hash: txHash
+        })
+        .returning();
+
+      // 增加stamp的claim_count
+      await tx.update(stamps)
+        .set({ 
+          claim_count: sql`COALESCE(claim_count, 0) + 1`,
+          updated_at: new Date()
+        })
+        .where(eq(stamps.stamp_id, stampId));
+
+      return userStampResult[0];
+    });
   }
 };
 

@@ -6,9 +6,8 @@ import type { DisplayStamp } from "~/types/stamp";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-interface StampGroupProps {
-  leftStamp?: DisplayStamp;
-  rightStamp?: DisplayStamp;
+interface StampGroupProps { 
+  stamps?: DisplayStamp[];
   onStampClick?: (code: string, stamp: DisplayStamp) => void;
   isLoading?: boolean;
   openStickers: Record<string, boolean>;
@@ -16,8 +15,7 @@ interface StampGroupProps {
 }
 
 export const StampGroup: FC<StampGroupProps> = ({
-  leftStamp,
-  rightStamp,
+  stamps,
   onStampClick,
   isLoading = false,
   openStickers,
@@ -38,64 +36,26 @@ export const StampGroup: FC<StampGroupProps> = ({
   return (
     <>
       <div className="flex flex-col items-center justify-center w-full sm:flex-row gap-8 px-4 gap-y-16 sm:gap-y-0 sm:px-0">
-        {/* Left Stamp */}
-        <div className="relative isolate w-full max-w-[350px]">
-          {leftStamp && (
-            <div className="w-full h-full flex items-center justify-center">
+          {stamps && stamps.length > 0 && stamps.map((stamp) => (
+            <div className="w-full h-full flex-row items-center justify-center sm:w-auto" key={stamp.id}>
               <Sticker
-                stampId={leftStamp.id}
-                url={leftStamp.imageUrl ?? ""}
-                name={leftStamp.name}
+                stampId={stamp.id}
+                url={stamp.imageUrl ?? ""}
+                name={stamp.name}
                 rotation={0}
-                amountLeft={leftStamp.leftStamps}
-                dropsAmount={leftStamp.leftStamps}
-                isClaimed={leftStamp.isClaimed}
-                isPublicClaim={leftStamp.publicClaim}
-                open={openStickers[leftStamp.id] ?? false}
-                onOpenChange={(open) => onOpenChange(leftStamp.id, open)}
-                onClaim={(code) => onStampClick?.(code, leftStamp)}
+                amountLeft={stamp.leftStamps}
+                dropsAmount={stamp.leftStamps}
+                isClaimed={stamp.isClaimed}
+                isPublicClaim={stamp.publicClaim}
+                open={openStickers[stamp.id] ?? false}
+                onOpenChange={(open) => onOpenChange(stamp.id, open)}
+                onClaim={(code) => onStampClick?.(code, stamp)}
                 isLoading={isLoading}
-                promoteUrl={leftStamp.promote_url}
+                promoteUrl={stamp.promote_url}
                 className="w-full h-full"
               />
             </div>
-          )}
-        </div>
-
-        {/* Middle Event Card */}
-        {/* <div 
-          className="relative isolate w-full max-w-[350px] aspect-[3/4] sm:h-[470px] flex flex-col items-center justify-center bg-[url('/images/qmark_bg.png')] bg-cover bg-center bg-no-repeat rounded-xl cursor-pointer transform transition-transform duration-300 hover:scale-105"
-          onClick={handleEventCardClick}
-        >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[140%] h-[140%]">
-            <div className="absolute inset-0 bg-purple-500 opacity-30 blur-[100px] rounded-full animate-[pulse_4s_ease-in-out_infinite]"></div>
-            <div className="absolute inset-0 bg-fuchsia-500 opacity-20 blur-[80px] rounded-full transform scale-90 animate-[pulse_4s_ease-in-out_infinite_1s]"></div>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-purple-500/10 rounded-xl"></div>
-          <Image src="/images/qmark.png" alt="qmark" sizes="100%" fill className="object-contain p-10" />
-        </div> */}
-
-        {/* Right Stamp */}
-        <div className="relative isolate w-full max-w-[350px]">
-          {rightStamp && (
-              <Sticker
-                stampId={rightStamp.id}
-                url={rightStamp.imageUrl ?? ""}
-                name={rightStamp.name}
-                rotation={0}
-                amountLeft={rightStamp.leftStamps}
-                dropsAmount={rightStamp.leftStamps}
-                isClaimed={rightStamp.isClaimed}
-                isPublicClaim={rightStamp.publicClaim}
-                open={openStickers[rightStamp.id] ?? false}
-                onOpenChange={(open) => onOpenChange(rightStamp.id, open)}
-                onClaim={(code) => onStampClick?.(code, rightStamp)}
-                isLoading={isLoading}
-                promoteUrl={rightStamp.promote_url}
-                className="w-full h-full"
-              />
-          )}
-        </div>
+          ))}
       </div>
 
       {isEventModalOpen && (
