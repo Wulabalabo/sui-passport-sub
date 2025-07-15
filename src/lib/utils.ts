@@ -24,7 +24,9 @@ export function usersToContributor(users: DbUserResponse[]): Contributor[] {
 }
 
 export function stampsToStickerData(stamps: StampItem[],collections: string[]): StickerData[] {
-  return stamps.map((stamp, index) => {
+  const uniqueStamps = [...new Map(stamps.map(item => [item.name.split('#')[0], item])).values()];
+  console.log(uniqueStamps);
+  return uniqueStamps.map((stamp, index) => {
     const position = index % 6;
     const stickerConfigs = {
       0: { rotation: -5, size: 240, top: 0, left: 0 },
