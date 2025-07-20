@@ -79,42 +79,43 @@ export const Sticker: FC<StickerProps> = (props) => {
       }
       onOpenChange?.(open);
     }}>
-      <DialogTrigger className={className} disabled={false}>
-        <div
-          className={cn("relative flex flex-col items-center justify-center")}
-          style={{
-            transform: `rotate(${rotation}deg)`,
-          }}
-        >
-          <AnimatedImage
-            src={url}
-            alt="sticker"
-            width={360}
-            height={360}
-            className={cn(
-              `mb-10 h-[240px] w-[240px] cursor-pointer sm:h-[360px] sm:w-[360px]`,
-              { "grayscale(100%) cursor-default opacity-40": isClaimed },
+      <div className="relative flex flex-col items-center">
+        <DialogTrigger className={className} disabled={false}>
+          <div
+            className={cn("relative flex flex-col items-center justify-center")}
+            style={{
+              transform: `rotate(${rotation}deg)`,
+            }}
+          >
+            <AnimatedImage
+              src={url}
+              alt="sticker"
+              width={360}
+              height={360}
+              className={cn(
+                `mb-10 h-[240px] w-[240px] cursor-pointer sm:h-[360px] sm:w-[360px]`,
+                { "grayscale(100%) cursor-default opacity-40": isClaimed },
+              )}
+              disabled={Boolean(isClaimed || dropsAmount <= 0)}
+            />
+            <p className="absolute bottom-0 font-everett uppercase text-[#ABBDCC]">
+              {name}
+            </p>
+            {isClaimed && (
+              <div className="absolute z-10 flex h-[29px] w-[78px] items-center justify-center rounded-xl bg-[#33404b] font-inter text-[#6f7f8c]">
+                Claimed
+              </div>
             )}
-            disabled={Boolean(isClaimed || dropsAmount <= 0)}
-          />
-          <p className="absolute bottom-0 font-everett uppercase text-[#ABBDCC]">
-            {name}
-          </p>
-          {isClaimed && (
-            <div className="absolute z-10 flex h-[29px] w-[78px] items-center justify-center rounded-xl bg-[#33404b] font-inter text-[#6f7f8c]">
-              Claimed
-            </div>
-          )}
 
-          {dropsAmount <= 0 && (
-            <div className="absolute z-10 flex h-[29px] w-[78px] items-center justify-center rounded-xl bg-[#33404b] font-inter text-[#6f7f8c]">
-              Sold Out
-            </div>
-          )}
-        </div>
-      </DialogTrigger>
-              {promoteUrl && (
-          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10 hover:scale-105 transition-all duration-300">
+            {dropsAmount <= 0 && (
+              <div className="absolute z-10 flex h-[29px] w-[78px] items-center justify-center rounded-xl bg-[#33404b] font-inter text-[#6f7f8c]">
+                Sold Out
+              </div>
+            )}
+          </div>
+        </DialogTrigger>
+        {promoteUrl && (
+          <div className="absolute top-full mt-4 left-1/2 transform -translate-x-1/2 hover:scale-105 transition-all duration-300">
             <RainbowButton
               onClick={() => window.open(promoteUrl, "_blank")}
               className="h-[40px] px-4 py-2 text-sm whitespace-nowrap"
@@ -133,6 +134,7 @@ export const Sticker: FC<StickerProps> = (props) => {
             </RainbowButton>
           </div>
         )}
+      </div>
       <DialogContent aria-describedby={undefined}>
         <DialogTitle />
         <motion.div
