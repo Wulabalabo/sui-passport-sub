@@ -73,6 +73,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // 检查是否为公开的路由（不需要认证）
+  const isPublicApiRoute = request.nextUrl.pathname.startsWith('/api/objectId/')
+  const isPublicPageRoute = request.nextUrl.pathname.startsWith('/objectId/')
+  
+  // 允许公开路由的请求通过
+  if (isPublicApiRoute || isPublicPageRoute) {
+    return NextResponse.next()
+  }
+
   // 允许 API 路由的 OPTIONS 和 GET 请求通过
   if (isApiRoute && (request.method === 'OPTIONS' || request.method === 'GET')) {
     return NextResponse.next()
