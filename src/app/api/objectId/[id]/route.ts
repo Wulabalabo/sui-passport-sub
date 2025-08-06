@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 等待params解析
+    const { id } = await params;
+    
     // 返回指定的图片URL
     const imageUrl = "https://r2.suisec.tech/Sui%20passport-min.png";
     
