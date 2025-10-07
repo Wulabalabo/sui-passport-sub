@@ -97,8 +97,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const isSuiWallet = /Slush/i.test(navigator.userAgent);
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    setShowMobilePopover(!isSuiWallet && isMobile);
+    //const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setShowMobilePopover(!isSuiWallet);
     setIsSuiWallet(isSuiWallet);
 
     if (process.env.NODE_ENV === 'production') {
@@ -111,7 +111,7 @@ export default function HomePage() {
       setIsCaptchaVerified(true);
     }
 
-    console.log("showMobilePopover", !isSuiWallet && isMobile);
+    console.log("showMobilePopover", !isSuiWallet);
     console.log("isSuiWallet", isSuiWallet);
   }, [token, verifyCaptcha]);
 
