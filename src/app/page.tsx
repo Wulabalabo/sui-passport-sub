@@ -71,7 +71,7 @@ export default function HomePage() {
   const [showMobilePopover, setShowMobilePopover] = useState(false);
   const [isSuiWallet, setIsSuiWallet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { hasAnySuiWallet } = useDetectSuiWallet();
+  const { hasAnySuiWallet, isSlushLikely } = useDetectSuiWallet();
 
   const { handleSignAndExecuteTransaction: handleClaimStampTx, isLoading: isClaimingStamp } =
     useBetterSignAndExecuteTransaction({
@@ -98,23 +98,37 @@ export default function HomePage() {
   }, [fetchUsers, networkVariables, refreshPassportStamps]);
 
   useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    setShowMobilePopover(!isSuiWallet && isMobile);
-    setIsSuiWallet(hasAnySuiWallet);
+    if (typeof window === "undefined") return;
 
-    if (process.env.NODE_ENV === 'production') {
-      if (token && !hasAnySuiWallet) {
-        void verifyCaptcha(token).then((success) => {
-          setIsCaptchaVerified(success);
-        });
+    // 更稳的移动端能力识别（优先 UA-CH，再退化到 pointer:coarse）
+    const mobileByUaCh =
+      (navigator as any).userAgentData?.mobile ??
+      (typeof matchMedia === "function" && matchMedia("(pointer:coarse)").matches);
+    const isMobile = Boolean(mobileByUaCh);
+
+    // 三段分流（优先级：Slush > 手机浏览器 > 普通网页）
+    const inSlush = isSlushLikely;                       // 1) Slush 容器
+    const inMobileBrowser = !inSlush && isMobile;        // 2) 系统手机浏览器
+    const needCaptcha = !inSlush && !inMobileBrowser;    // 3) 普通网页（桌面等）
+
+    // 1) 控制 Popover
+    setShowMobilePopover(inMobileBrowser);
+    // 2) Slush 视为“Sui 钱包容器”
+    setIsSuiWallet(inSlush);
+
+    // 3) 验证码（仅普通网页需要）
+    if (process.env.NODE_ENV === "production") {
+      if (needCaptcha && token) {
+        void verifyCaptcha(token).then((ok) => setIsCaptchaVerified(ok));
+      } else if (!needCaptcha) {
+        setIsCaptchaVerified(true);
       }
     } else {
       setIsCaptchaVerified(true);
     }
 
-    console.log("showMobilePopover", !isSuiWallet && isMobile);
-    console.log("isSuiWallet", isSuiWallet);
-  }, [token, verifyCaptcha]);
+    console.log("[env] slush:", inSlush, "mobile-browser:", inMobileBrowser, "needCaptcha:", needCaptcha);
+  }, [token, verifyCaptcha, isSlushLikely]);
 
   useEffect(() => {
     void initializeData();
@@ -361,7 +375,7 @@ export default function HomePage() {
               </p>
               <p>
                 Connect your wallet today and claim your first stamp!
-              </p>              
+              </p>
               <RainbowButton
                 onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
                 className="block sm:hidden w-full sm:w-auto"
@@ -414,20 +428,22 @@ export default function HomePage() {
           * 1. Not using Sui Wallet (!isSuiWallet) - Sui Wallet users don't need captcha verification
           * 2. No captcha token exists (!token) - Don't show if already verified
         */}
-        {!isSuiWallet && !token && process.env.NODE_ENV === 'production' && (
-          <div className="fixed bottom-4 right-4">
-            <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
-              options={{
-                theme: "dark",
-                language: "en",
-              }}
-              onSuccess={(token) => {
-                setToken(token);
-              }}
-            />
-          </div>
-        )}
+        {process.env.NODE_ENV === 'production' && !isSlushLikely && typeof window !== "undefined" &&
+          !((navigator as any).userAgentData?.mobile ?? (typeof matchMedia === "function" && matchMedia("(pointer:coarse)").matches)) &&
+          !token && (
+            <div className="fixed bottom-4 right-4">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+                options={{
+                  theme: "dark",
+                  language: "en",
+                }}
+                onSuccess={(token) => {
+                  setToken(token);
+                }}
+              />
+            </div>
+          )}
       </div>
     </main>
   );
