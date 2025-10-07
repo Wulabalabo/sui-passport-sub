@@ -15,9 +15,9 @@ const config = {
                 hostname: "avatar.suipassport.app",
             },
         ],
-    // },
-    // compiler:{
-    //     removeConsole: process.env.NODE_ENV === "production",
+    },
+    compiler: {
+        removeConsole: process.env.NODE_ENV === "production",
     },
     eslint: {
         ignoreDuringBuilds: true,

@@ -69,7 +69,6 @@ export default function HomePage() {
   const [token, setToken] = useState<string | null>(null);
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [showMobilePopover, setShowMobilePopover] = useState(false);
-  const [isSuiWallet, setIsSuiWallet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { hasAnySuiWallet } = useDetectSuiWallet();
 
@@ -99,13 +98,11 @@ export default function HomePage() {
 
   useEffect(() => {
     console.log("navigator.userAgent", navigator.userAgent);
-    const isSuiWallet = hasAnySuiWallet;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    setShowMobilePopover(!isSuiWallet && isMobile);
-    setIsSuiWallet(isSuiWallet);
+    setShowMobilePopover(!hasAnySuiWallet && isMobile);
 
     if (process.env.NODE_ENV === 'production') {
-      if (token && !isSuiWallet) {
+      if (token && !hasAnySuiWallet) {
         void verifyCaptcha(token).then((success) => {
           setIsCaptchaVerified(success);
         });
@@ -114,8 +111,8 @@ export default function HomePage() {
       setIsCaptchaVerified(true);
     }
 
-    console.log("showMobilePopover", !isSuiWallet && isMobile);
-    console.log("isSuiWallet", isSuiWallet);
+    console.log("showMobilePopover", !hasAnySuiWallet && isMobile);
+    console.log("isSuiWallet", hasAnySuiWallet);
   }, [token, verifyCaptcha]);
 
   useEffect(() => {
@@ -416,7 +413,7 @@ export default function HomePage() {
           * 1. Not using Sui Wallet (!isSuiWallet) - Sui Wallet users don't need captcha verification
           * 2. No captcha token exists (!token) - Don't show if already verified
         */}
-        {!isSuiWallet && !token && process.env.NODE_ENV === 'production' && (
+        {!hasAnySuiWallet && !token && process.env.NODE_ENV === 'production' && (
           <div className="fixed bottom-4 right-4">
             <Turnstile
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
