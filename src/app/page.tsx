@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { StampGroup } from "~/components/StampGroup/StampGroup";
 import { RainbowButton } from "~/components/magicui/rainbow-button";
+import { useDetectSuiWallet } from "~/hooks/use-detect-suiWallet";
 
 const pulseKeyframes = `
 @keyframes pulse-slow {
@@ -70,6 +71,7 @@ export default function HomePage() {
   const [showMobilePopover, setShowMobilePopover] = useState(false);
   const [isSuiWallet, setIsSuiWallet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { hasAnySuiWallet } = useDetectSuiWallet();
 
   const { handleSignAndExecuteTransaction: handleClaimStampTx, isLoading: isClaimingStamp } =
     useBetterSignAndExecuteTransaction({
@@ -96,9 +98,10 @@ export default function HomePage() {
   }, [fetchUsers, networkVariables, refreshPassportStamps]);
 
   useEffect(() => {
-    const isSuiWallet = /Slush/i.test(navigator.userAgent);
-    //const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    setShowMobilePopover(!isSuiWallet);
+    console.log("navigator.userAgent", navigator.userAgent);
+    const isSuiWallet = hasAnySuiWallet;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setShowMobilePopover(!isSuiWallet && isMobile);
     setIsSuiWallet(isSuiWallet);
 
     if (process.env.NODE_ENV === 'production') {
@@ -111,7 +114,7 @@ export default function HomePage() {
       setIsCaptchaVerified(true);
     }
 
-    console.log("showMobilePopover", !isSuiWallet);
+    console.log("showMobilePopover", !isSuiWallet && isMobile);
     console.log("isSuiWallet", isSuiWallet);
   }, [token, verifyCaptcha]);
 
