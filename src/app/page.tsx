@@ -328,7 +328,7 @@ export default function HomePage() {
 
           <div className="flex items-center justify-between w-full sm:w-auto gap-4">
             <RainbowButton
-              onClick={() => window.open("https://x.com/SuiFamOfficial", "_blank")}
+              onClick={() => window.open("https://x.com/suicommunity", "_blank")}
               className="hidden sm:block w-full sm:w-auto"
             >
               <div className="flex items-center justify-center gap-2">
