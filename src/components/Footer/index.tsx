@@ -10,7 +10,7 @@ export default function Footer() {
                     <div className="flex flex-col gap-3 md:gap-4">
                         <h3 className="font-everett text-xl text-white">Connect With Us</h3>
                         <div className="flex gap-6">
-                            <a href="https://x.com/SuiFamOfficial" 
+                            <a href="https://x.com/suicommunity" 
                                target="_blank" 
                                rel="noopener noreferrer" 
                                className="text-[#ABBDCC] hover:text-[#4DA2FF] transition-colors">
