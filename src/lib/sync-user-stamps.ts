@@ -1,5 +1,5 @@
 import { db } from './neondb';
-import { users, user_stamps } from './db/schema';
+import { user_stamps } from './db/schema';
 import { passportService, userService } from './db';
 import { suiClient, graphqlClient } from '../app/api/SuiClient';
 import { eq, and } from 'drizzle-orm';
@@ -17,7 +17,7 @@ export async function syncUserStampsFromChain(options: {
     batchSize = 100,           // 每批处理用户数量
     concurrency = 5,           // 并发数量
     startFromUserId = 0,       // 断点续传支持
-    packageId = process.env.NEXT_PUBLIC_PACKAGE_ID || ''
+    packageId = !process.env.NEXT_PUBLIC_PACKAGE_ID
   } = options;
 
   console.log('🚀 开始同步用户stamp数据...');
@@ -53,7 +53,7 @@ export async function syncUserStampsFromChain(options: {
       const promises = userBatch.map(user => 
         semaphore.acquire().then(async (release) => {
           try {
-            const result = await processUser(user.address, packageId);
+            const result = await processUser(user.address, packageId as string);
             release();
             return result;
           } catch (error) {
